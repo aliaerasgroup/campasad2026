@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- SECRET TESTING RESET ---
+    // If you visit the URL with ?reset=true at the end, it wipes all bookings.
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('reset')) {
+        localStorage.removeItem('campAsadBookings');
+        // Redirect back to the clean URL
+        window.location.href = window.location.pathname; 
+        return; // Stop running the rest of the script until it reloads
+    }
+
     // --- Modal Logic ---
     const pdfModal = document.getElementById('pdf-modal');
     const openPdfBtn = document.getElementById('open-pdf-btn');
