@@ -1,5 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // State variables
+    // --- PDF Modal Logic ---
+    const modal = document.getElementById('pdf-modal');
+    const openPdfBtn = document.getElementById('open-pdf-btn');
+    const closeBtn = document.querySelector('.close-btn');
+
+    openPdfBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    });
+
+    // --- Booking Tool Logic ---
     let selectedScholar = null;
     let selectedDate = '2026-09-05';
     let selectedTime = null;
@@ -19,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // Mock Database for already booked slots (Format: Scholar_Date_Time)
-    // To implement backend, this array should be fetched from your database
     const bookedSlots = [
         "Sayyid Ali Imran_2026-09-05_06:30",
         "Ustadha Zermina Awan_2026-09-06_07:15"
@@ -55,8 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to check if slot is valid (3-hour rule & past rule)
     function isSlotAvailable(slotTimeStr) {
         // Parse the slot date and time
-        const slotDateTime = new Date(`${selectedDate}T${slotTimeStr}:00-04:00`); // Assuming EDT/EST
-        const now = new Date(); // Gets the user's current local time
+        const slotDateTime = new Date(`${selectedDate}T${slotTimeStr}:00-04:00`); 
+        const now = new Date(); 
         
         // Calculate the difference in milliseconds
         const diffMs = slotDateTime - now;
@@ -133,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
             notes: document.getElementById('notes').value
         };
 
-        // Here you would typically POST to a backend or serverless function
         console.log("Booking Payload:", attendeeData);
         alert(`Booking Confirmed!\n\nScholar: ${attendeeData.scholar}\nDate: ${attendeeData.date}\nTime: ${formatTime(attendeeData.time)}\n\nA confirmation email will be sent to ${attendeeData.email}.`);
         
