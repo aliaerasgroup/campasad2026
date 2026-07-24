@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseSlots = ["06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45"];
 
-    // Use localStorage to mock a backend database. Cleared out previously booked mock slots.
+    // Use localStorage to mock a backend database. 
     let bookedSlots = JSON.parse(localStorage.getItem('campAsadBookings')) || [];
 
     // 1. Scholar Selection
@@ -151,13 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notes: document.getElementById('notes').value
         };
 
-        /* 
-        ========================================================================
-        EMAILJS INTEGRATION
-        Uncomment this section once you have your EmailJS service set up.
-        ========================================================================
-        
-        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", attendeeData)
+        // Fully integrated EmailJS function
+        emailjs.send("service_97zm0ea", "template_mh8tn4s", attendeeData)
             .then(function(response) {
                 console.log('SUCCESS!', response.status, response.text);
                 finalizeBooking();
@@ -166,10 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("There was an issue sending the confirmation email, but your spot is reserved.");
                 finalizeBooking();
             });
-        */
-
-        // Remove this setTimeout when EmailJS is hooked up. It just simulates a server delay.
-        setTimeout(finalizeBooking, 800);
 
         function finalizeBooking() {
             // Save the booking locally so it immediately disappears from the grid
