@@ -1,28 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- PDF Modal Logic ---
-    const modal = document.getElementById('pdf-modal');
+    // --- Modal Logic ---
+    const pdfModal = document.getElementById('pdf-modal');
     const openPdfBtn = document.getElementById('open-pdf-btn');
-    const closeBtn = document.querySelector('.close-btn');
+    const closePdfBtn = document.getElementById('close-pdf');
 
-    openPdfBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-    });
+    const successModal = document.getElementById('success-modal');
+    const closeSuccessBtn = document.getElementById('close-success');
+    const successDoneBtn = document.getElementById('success-done-btn');
 
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('show');
+    function openModal(modalEl) {
+        modalEl.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalEl) {
+        modalEl.classList.remove('show');
         document.body.style.overflow = 'auto';
-    });
+    }
+
+    openPdfBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(pdfModal); });
+    closePdfBtn.addEventListener('click', () => closeModal(pdfModal));
+    
+    closeSuccessBtn.addEventListener('click', () => closeModal(successModal));
+    successDoneBtn.addEventListener('click', () => closeModal(successModal));
 
     window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
+        if (e.target === pdfModal) closeModal(pdfModal);
+        if (e.target === successModal) closeModal(successModal);
     });
 
-    // --- Booking Tool Logic ---
+    // --- Booking Logic ---
     let selectedScholar = null;
     let selectedDate = '2026-09-05';
     let selectedTime = null;
@@ -30,22 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const scholarBtns = document.querySelectorAll('.scholar-btn');
     const dateBtns = document.querySelectorAll('.date-btn');
     const timeGrid = document.getElementById('time-slots');
-    
     const datetimeStep = document.getElementById('datetime-step');
     const formStep = document.getElementById('form-step');
     const bookingForm = document.getElementById('booking-form');
+    const tabSep7 = document.getElementById('tab-sep7');
+    const tabSep5 = document.getElementById('tab-sep5');
+    const submitBtn = document.getElementById('submit-booking-btn');
 
-    // Base slots: 6:00 AM to 8:00 AM in 15 min increments
-    const baseSlots = [
-        "06:00", "06:15", "06:30", "06:45",
-        "07:00", "07:15", "07:30", "07:45"
-    ];
+    const baseSlots = ["06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45"];
 
-    // Mock Database for already booked slots (Format: Scholar_Date_Time)
-    const bookedSlots = [
-        "Sayyid Ali Imran_2026-09-05_06:30",
-        "Ustadha Zermina Awan_2026-09-06_07:15"
-    ];
+    // Use localStorage to mock a backend database. Cleared out previously booked mock slots.
+    let bookedSlots = JSON.parse(localStorage.getItem('campAsadBookings')) || [];
 
     // 1. Scholar Selection
     scholarBtns.forEach(btn => {
@@ -54,7 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('selected');
             selectedScholar = e.target.dataset.scholar;
             
-            // Unlock next step
+            // Logic Update: Sh. Bachoo not available Sep 7
+            if (selectedScholar === "Shaykh Murtaza Bachoo") {
+                tabSep7.style.display = 'none';
+                // If user was on Sep 7, force them back to Sep 5
+                if (selectedDate === '2026-09-07') {
+                    tabSep5.click();
+                }
+            } else {
+                tabSep7.style.display = 'inline-block';
+            }
+
             datetimeStep.classList.remove('disabled');
             renderTimeSlots();
         });
@@ -67,38 +79,27 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('active');
             selectedDate = e.target.dataset.date;
             
-            // Re-render slots for new date
             renderTimeSlots();
-            selectedTime = null; // Reset time selection
+            selectedTime = null; 
             formStep.classList.add('disabled');
         });
     });
 
-    // Function to check if slot is valid (3-hour rule & past rule)
     function isSlotAvailable(slotTimeStr) {
-        // Parse the slot date and time
         const slotDateTime = new Date(`${selectedDate}T${slotTimeStr}:00-04:00`); 
         const now = new Date(); 
         
-        // Calculate the difference in milliseconds
         const diffMs = slotDateTime - now;
         const diffHours = diffMs / (1000 * 60 * 60);
 
-        // Rule: Cannot book if day has passed OR less than 3 hours left
-        if (diffHours < 3) {
-            return false;
-        }
+        if (diffHours < 3) return false;
 
-        // Rule: Cannot book if already taken
         const bookingKey = `${selectedScholar}_${selectedDate}_${slotTimeStr}`;
-        if (bookedSlots.includes(bookingKey)) {
-            return false;
-        }
+        if (bookedSlots.includes(bookingKey)) return false;
 
         return true;
     }
 
-    // Format 24h to 12h AM/PM for display
     function formatTime(time24) {
         const [hours, minutes] = time24.split(':');
         const h = parseInt(hours);
@@ -107,60 +108,87 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${h12}:${minutes} ${ampm}`;
     }
 
-    // Render slots dynamically
     function renderTimeSlots() {
-        timeGrid.innerHTML = ''; // Clear previous
-
+        timeGrid.innerHTML = ''; 
         baseSlots.forEach(slot => {
             const btn = document.createElement('button');
             btn.className = 'time-btn';
             btn.textContent = formatTime(slot);
             btn.dataset.time = slot;
+            btn.type = "button";
 
             if (!isSlotAvailable(slot)) {
                 btn.disabled = true;
-                btn.title = "Slot unavailable or too close to current time.";
             } else {
                 btn.addEventListener('click', handleTimeSelection);
             }
-
             timeGrid.appendChild(btn);
         });
     }
 
-    // Handle selecting a specific time
     function handleTimeSelection(e) {
         document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
         e.target.classList.add('selected');
         selectedTime = e.target.dataset.time;
         
-        // Unlock final step
         formStep.classList.remove('disabled');
-        
-        // Scroll to form smoothly
         formStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // Handle Form Submission
     bookingForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        submitBtn.textContent = "Booking...";
+        submitBtn.disabled = true;
         
         const attendeeData = {
             scholar: selectedScholar,
             date: selectedDate,
-            time: selectedTime,
+            time: formatTime(selectedTime), 
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             phone: document.getElementById('phone').value,
             notes: document.getElementById('notes').value
         };
 
-        console.log("Booking Payload:", attendeeData);
-        alert(`Booking Confirmed!\n\nScholar: ${attendeeData.scholar}\nDate: ${attendeeData.date}\nTime: ${formatTime(attendeeData.time)}\n\nA confirmation email will be sent to ${attendeeData.email}.`);
+        /* 
+        ========================================================================
+        EMAILJS INTEGRATION
+        Uncomment this section once you have your EmailJS service set up.
+        ========================================================================
         
-        // Reset form
-        bookingForm.reset();
-        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-        formStep.classList.add('disabled');
+        emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", attendeeData)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+                finalizeBooking();
+            }, function(error) {
+                console.log('FAILED...', error);
+                alert("There was an issue sending the confirmation email, but your spot is reserved.");
+                finalizeBooking();
+            });
+        */
+
+        // Remove this setTimeout when EmailJS is hooked up. It just simulates a server delay.
+        setTimeout(finalizeBooking, 800);
+
+        function finalizeBooking() {
+            // Save the booking locally so it immediately disappears from the grid
+            const bookingKey = `${selectedScholar}_${selectedDate}_${selectedTime}`;
+            bookedSlots.push(bookingKey);
+            localStorage.setItem('campAsadBookings', JSON.stringify(bookedSlots));
+
+            // Show Success Modal
+            openModal(successModal);
+            
+            // Reset form and UI
+            bookingForm.reset();
+            submitBtn.textContent = "Confirm Booking";
+            submitBtn.disabled = false;
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+            formStep.classList.add('disabled');
+            
+            // Re-render to show the slot as unavailable immediately
+            renderTimeSlots();
+        }
     });
 });
