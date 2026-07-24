@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedScholar = null;
     let selectedDate = '2026-09-05';
     let selectedTime = null;
+    let isActivelyBooking = false; // FIX: Flag to prevent the app from alerting you about your own booking!
 
     const scholarBtns = document.querySelectorAll('.scholar-btn');
     const dateBtns = document.querySelectorAll('.date-btn');
@@ -84,18 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let bookedSlots = [];
 
     // --- REALTIME FIREBASE SYNC ---
-    // This constantly listens to the database. If anyone else books a slot anywhere in the world,
-    // this instantly updates the 'bookedSlots' array and visually refreshes the buttons on screen.
     const bookingsRef = ref(db, 'bookings');
     onValue(bookingsRef, (snapshot) => {
         const data = snapshot.val();
-        // If data exists, pull out all the keys (the locked slots). Otherwise, empty array.
         bookedSlots = data ? Object.keys(data) : [];
         
-        // If the user currently has a scholar/date selected, refresh the buttons so slots disappear live
         if (selectedScholar && selectedDate && !formStep.classList.contains('disabled')) {
-             // Avoid resetting their selection if they are in the middle of filling out the form
-             // but visually grey out the ones that just got taken.
              renderTimeSlots(true);
         } else if (selectedScholar && selectedDate) {
              renderTimeSlots();
@@ -143,10 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffMs = slotDateTime - now;
         const diffHours = diffMs / (1000 * 60 * 60);
 
-        // Blocks slots closer than 3 hours
         if (diffHours < 3) return false;
 
-        // Formats string to match Firebase key exactly
         const bookingKey = `${selectedScholar}_${selectedDate}_${slotTimeStr}`;
         if (bookedSlots.includes(bookingKey)) return false;
 
@@ -172,15 +165,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!isSlotAvailable(slot)) {
                 btn.disabled = true;
-                // If the slot they selected was just taken by someone else, kick them out of the form
-                if (selectedTime === slot) {
+                // FIX: Only trigger the boot-out alert if the user is NOT actively submitting the form
+                if (selectedTime === slot && !isActivelyBooking) {
                     selectedTime = null;
                     formStep.classList.add('disabled');
                     alert("Someone just booked this slot! Please choose another time.");
                 }
             } else {
                 btn.addEventListener('click', handleTimeSelection);
-                // Retain visual selection if realtime sync triggers a re-render
                 if (keepSelection && selectedTime === slot) {
                     btn.classList.add('selected');
                 }
@@ -202,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
     bookingForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Final sanity check before firing emails off - is the slot STILL available?
         if (!isSlotAvailable(selectedTime)) {
             alert("Sorry, this slot was just taken by someone else! Please choose another time.");
             selectedTime = null;
@@ -211,6 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Engage the active booking lock
+        isActivelyBooking = true;
+        
         submitBtn.textContent = "Booking...";
         submitBtn.disabled = true;
         
@@ -228,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
             gcal_link: googleCalendarUrl
         };
 
-        // 1. Send the email via EmailJS
         emailjs.send("service_97zm0ea", "template_mh8tn4s", attendeeData)
             .then(function(response) {
                 console.log('Email Sent!', response.status, response.text);
@@ -239,27 +232,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalizeBookingToFirebase(nameInput);
             });
 
-        // 2. Write to Firebase Realtime Database
         function finalizeBookingToFirebase(attendeeName) {
             const bookingKey = `${selectedScholar}_${selectedDate}_${selectedTime}`;
             
-            // Push the data to the central database
             set(ref(db, 'bookings/' + bookingKey), {
                 bookedBy: attendeeName,
                 timestamp: new Date().toISOString()
             }).then(() => {
-                // Success!
+                // Disengage lock and clear selection BEFORE firing the modal
+                isActivelyBooking = false; 
+                selectedTime = null;
+
                 openModal(successModal);
                 bookingForm.reset();
                 submitBtn.textContent = "Confirm Booking";
                 submitBtn.disabled = false;
                 document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
                 formStep.classList.add('disabled');
-                selectedTime = null;
-                // renderTimeSlots is automatically called by the Firebase onValue listener!
             }).catch((error) => {
                 console.error("Firebase write failed: ", error);
                 alert("Critical error saving to database. Please notify an organizer.");
+                isActivelyBooking = false;
                 submitBtn.textContent = "Confirm Booking";
                 submitBtn.disabled = false;
             });
