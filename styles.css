@@ -101,9 +101,11 @@ body {
     margin-bottom: 35px;
 }
 
-/* Buttons */
+/* Original Buttons with unified sizing fix */
 .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 12px 25px;
     border-radius: 5px;
     text-decoration: none;
@@ -112,10 +114,29 @@ body {
     cursor: pointer;
     border: none;
     font-family: 'Neue Montreal', sans-serif;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
-/* Unified Hero Actions to guarantee identical dimensions */
+.btn-primary {
+    background-color: var(--primary-brown);
+    color: var(--text-light);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-brown);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-light);
+    border: 2px solid var(--text-light);
+}
+
+.btn-secondary:hover {
+    background-color: var(--text-light);
+    color: var(--primary-brown);
+}
+
 .hero-actions {
     display: flex;
     justify-content: center;
@@ -124,41 +145,10 @@ body {
     flex-wrap: wrap; 
 }
 
-.hero-btn {
-    width: 240px; /* Fixed identical width for both buttons */
-    height: 48px; /* Fixed identical height */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    font-family: 'Neue Montreal', sans-serif;
-    font-size: 1rem;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.hero-btn-primary {
-    background-color: var(--primary-brown);
-    color: var(--text-light);
-    border: none;
-}
-
-.hero-btn-primary:hover {
-    background-color: var(--secondary-brown);
-}
-
-.hero-btn-secondary {
-    background-color: transparent;
-    color: var(--text-light);
-    border: 2px solid var(--text-light);
-}
-
-.hero-btn-secondary:hover {
-    background-color: var(--text-light);
-    color: var(--primary-brown);
+/* Forces both hero buttons to have identical width and height */
+.sizing-fix {
+    width: 240px;
+    height: 48px;
 }
 
 /* Sections */
