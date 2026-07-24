@@ -9,7 +9,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // Initialized with your specific Public Key
             emailjs.init("j8P3bzeNXKRO57k18"); 
         })();
     </script>
@@ -94,15 +93,17 @@
 
     <!-- PDF Modal -->
     <div id="pdf-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content pdf-modal-content">
             <span class="close-btn" id="close-pdf">&times;</span>
-            <div class="iframe-container">
+            <!-- Desktop View: Full Embedded Iframe -->
+            <div class="iframe-container desktop-pdf">
                 <iframe src="Camp Asad 2026 Package.pdf" frameborder="0"></iframe>
             </div>
-            <!-- Mobile Fallback for PDF -->
-            <div class="mobile-pdf-fallback">
-                <p>Having trouble viewing?</p>
-                <a href="Camp Asad 2026 Package.pdf" target="_blank" class="btn btn-primary">Open PDF in New Tab</a>
+            <!-- Mobile View: Clean Direct Action Card to avoid browser iframe bugs -->
+            <div class="mobile-pdf-action">
+                <h3 class="section-title" style="font-size: 1.8rem; margin-bottom: 15px;">Camp Package</h3>
+                <p style="margin-bottom: 25px;">Tap below to view the official welcome letter, packing list, rules, and details for Camp Asad 2026.</p>
+                <a href="Camp Asad 2026 Package.pdf" target="_blank" class="btn btn-primary" style="font-size: 1.1rem; padding: 15px 30px;">Open PDF Document</a>
             </div>
         </div>
     </div>
