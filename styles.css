@@ -38,7 +38,7 @@ body {
     line-height: 1.6;
 }
 
-/* Mobile Background Optimization using your dedicated vertical background asset */
+/* Mobile Background Optimization using dedicated vertical background asset */
 @media (max-width: 768px) {
     body {
         background: url('mobile-bg.png') no-repeat center center fixed;
@@ -97,11 +97,11 @@ body {
 
 .theme {
     font-size: 1.5rem;
-    font-style: normal; /* Non-italicized theme text */
+    font-style: normal;
     margin-bottom: 35px;
 }
 
-/* Original Buttons with unified sizing fix */
+/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -145,7 +145,6 @@ body {
     flex-wrap: wrap; 
 }
 
-/* Forces both hero buttons to have identical width and height */
 .sizing-fix {
     width: 240px;
     height: 48px;
