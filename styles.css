@@ -44,12 +44,11 @@ body {
     padding: 0 20px;
 }
 
-/* Add a slight background overlay to content so text remains readable over the background image */
 .content-container {
-    background-color: rgba(244, 241, 234, 0.95); /* Cream colour with slight transparency */
+    background-color: rgba(244, 241, 234, 0.95); 
     border-radius: 10px;
     padding: 40px;
-    margin-top: -30px; /* Slight overlap with hero */
+    margin-top: -30px; 
     margin-bottom: 50px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
@@ -59,8 +58,8 @@ body {
     color: var(--text-light);
     text-align: center;
     padding: 120px 20px 100px;
-    background: transparent; /* Removed the brown gradient overlay */
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* Added slight shadow so white text remains readable */
+    background: transparent; 
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5); 
 }
 
 .subtitle {
@@ -84,7 +83,7 @@ body {
     padding: 10px 25px;
     font-size: 1.2rem;
     margin-bottom: 30px;
-    background-color: rgba(0,0,0,0.2); /* Slight darkening behind the badge */
+    background-color: rgba(0,0,0,0.2); 
 }
 
 .theme {
@@ -301,7 +300,7 @@ footer {
     color: #fff;
 }
 
-/* Modal CSS */
+/* Modals */
 .modal {
     display: none;
     position: fixed;
@@ -315,12 +314,13 @@ footer {
 }
 
 .modal.show {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
     background-color: var(--bg-cream);
-    margin: 3vh auto;
     width: 90%;
     max-width: 1000px;
     height: 90vh;
@@ -378,9 +378,35 @@ footer {
     border-bottom-right-radius: 10px;
 }
 
-/* Show fallback link on smaller screens where iframes might struggle with PDFs */
 @media (max-width: 768px) {
     .mobile-pdf-fallback {
         display: block;
     }
+}
+
+/* Notices & Success Modal Extensions */
+.cancel-notice {
+    font-size: 0.9rem;
+    color: var(--secondary-brown);
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.success-box {
+    height: auto;
+    min-height: 300px;
+    max-width: 500px;
+    padding: 40px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.success-msg {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
 }
