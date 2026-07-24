@@ -8,19 +8,19 @@
 </head>
 <body>
     <header class="hero">
-        <div class="container">
+        <div class="container hero-content">
             <p class="subtitle">MAHDI YOUTH SOCIETY</p>
             <h1 class="title">CAMP ASAD</h1>
             <div class="date-badge">SEP 4-7 | 2026</div>
             <h2 class="theme">THEME: Woven Together.</h2>
             <div class="hero-actions">
-                <a href="camp-package.pdf" download class="btn btn-primary">Download Camp Package</a>
+                <button id="open-pdf-btn" class="btn btn-primary">View Camp Package</button>
                 <a href="#schedule" class="btn btn-secondary">View Schedule</a>
             </div>
         </div>
     </header>
 
-    <main class="container">
+    <main class="container content-container">
         <!-- Schedule Section -->
         <section id="schedule" class="section">
             <h3 class="section-title">Camp Schedule</h3>
@@ -82,6 +82,21 @@
     <footer>
         <p>Al Mahdi Islamic Community Centre | 510 Concession Road 3, Pickering ON</p>
     </footer>
+
+    <!-- PDF Modal -->
+    <div id="pdf-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="iframe-container">
+                <iframe src="Camp Asad 2026 Package.pdf" frameborder="0"></iframe>
+            </div>
+            <!-- Mobile Fallback for PDF -->
+            <div class="mobile-pdf-fallback">
+                <p>Having trouble viewing?</p>
+                <a href="Camp Asad 2026 Package.pdf" target="_blank" class="btn btn-primary">Open PDF in New Tab</a>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
