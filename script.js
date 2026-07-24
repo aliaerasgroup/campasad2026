@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- SECRET TESTING RESET ---
-    // If you visit the URL with ?reset=true at the end, it wipes all bookings.
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('reset')) {
         localStorage.removeItem('campAsadBookings');
-        // Redirect back to the clean URL
         window.location.href = window.location.pathname; 
-        return; // Stop running the rest of the script until it reloads
+        return;
     }
 
     // --- Modal Logic ---
@@ -39,6 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === successModal) closeModal(successModal);
     });
 
+    // --- Helper to Generate Google Calendar URL ---
+    function generateGCalLink(scholar, dateStr, time24Str) {
+        const startDate = new Date(`${dateStr}T${time24Str}:00-04:00`);
+        const startISO = startDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+        const endDate = new Date(startDate.getTime() + 15 * 60000);
+        const endISO = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+        const title = encodeURIComponent(`Aalim Hours: ${scholar} - Camp Asad`);
+        const details = encodeURIComponent(`Confidential 1-on-1 Aalim Hours session at Camp Asad 2026.\n\nPlease arrive on time to maximize your session.`);
+        const location = encodeURIComponent(`Al Mahdi Islamic Community Centre, 510 Concession Road 3, Pickering ON`);
+
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${details}&location=${location}`;
+    }
+
     // --- Booking Logic ---
     let selectedScholar = null;
     let selectedDate = '2026-09-05';
@@ -56,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseSlots = ["06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45"];
 
-    // Use localStorage to mock a backend database. 
     let bookedSlots = JSON.parse(localStorage.getItem('campAsadBookings')) || [];
 
     // 1. Scholar Selection
@@ -66,10 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('selected');
             selectedScholar = e.target.dataset.scholar;
             
-            // Logic Update: Sh. Bachoo not available Sep 7
             if (selectedScholar === "Shaykh Murtaza Bachoo") {
                 tabSep7.style.display = 'none';
-                // If user was on Sep 7, force them back to Sep 5
                 if (selectedDate === '2026-09-07') {
                     tabSep5.click();
                 }
@@ -151,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = "Booking...";
         submitBtn.disabled = true;
         
+        // Generate Google Calendar Url
+        const googleCalendarUrl = generateGCalLink(selectedScholar, selectedDate, selectedTime);
+
         const attendeeData = {
             scholar: selectedScholar,
             date: selectedDate,
@@ -158,10 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             phone: document.getElementById('phone').value,
-            notes: document.getElementById('notes').value
+            notes: document.getElementById('notes').value,
+            gcal_link: googleCalendarUrl
         };
 
-        // Fully integrated EmailJS function
         emailjs.send("service_97zm0ea", "template_mh8tn4s", attendeeData)
             .then(function(response) {
                 console.log('SUCCESS!', response.status, response.text);
@@ -173,22 +186,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         function finalizeBooking() {
-            // Save the booking locally so it immediately disappears from the grid
             const bookingKey = `${selectedScholar}_${selectedDate}_${selectedTime}`;
             bookedSlots.push(bookingKey);
             localStorage.setItem('campAsadBookings', JSON.stringify(bookedSlots));
 
-            // Show Success Modal
             openModal(successModal);
             
-            // Reset form and UI
             bookingForm.reset();
             submitBtn.textContent = "Confirm Booking";
             submitBtn.disabled = false;
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
             formStep.classList.add('disabled');
             
-            // Re-render to show the slot as unavailable immediately
             renderTimeSlots();
         }
     });
