@@ -38,7 +38,6 @@
 }
 
 body {
-    /* Replaced Helvetica/Arial with Montserrat as the fallback */
     font-family: 'Neue Montreal', 'Montserrat', sans-serif;
     background: url('website-bg.png') no-repeat center center fixed;
     background-size: cover;
@@ -46,7 +45,6 @@ body {
     line-height: 1.6;
 }
 
-/* Mobile Background Optimization using dedicated vertical background asset */
 @media (max-width: 768px) {
     body {
         background: url('mobile-bg.png') no-repeat center center fixed;
@@ -171,7 +169,7 @@ body {
 }
 
 .section-title {
-    font-family: 'Sifonn', 'Montserrat', sans-serif; /* Back to Sifonn */
+    font-family: 'Sifonn', 'Montserrat', sans-serif;
     font-size: 2.2rem;
     color: var(--primary-brown);
     margin-bottom: 10px;
@@ -182,29 +180,36 @@ body {
     margin-bottom: 25px;
 }
 
-/* Image Placeholder */
-.image-placeholder {
+/* Schedule Image Container */
+.schedule-img-container {
     width: 100%;
-    height: 300px;
-    background-color: #e5e0d8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed var(--primary-brown);
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
     border-radius: 10px;
-    position: relative;
-    overflow: hidden;
+    border: 1px solid rgba(74, 59, 44, 0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background-color: #e5e0d8;
 }
 
-.image-placeholder img {
-    max-width: 100%;
-    opacity: 0.3;
+.schedule-img-container img {
+    min-width: 800px; /* Ensures text stays readable on phones */
+    width: 100%; /* Expands naturally on desktops */
+    height: auto;
+    display: block;
 }
 
-.image-placeholder p {
-    position: absolute;
-    font-weight: bold;
-    color: var(--primary-brown);
+.mobile-swipe-note {
+    display: none;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--secondary-brown);
+    margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+    .mobile-swipe-note {
+        display: block;
+    }
 }
 
 /* Booking Tool */
@@ -235,7 +240,6 @@ body {
     margin-bottom: 15px;
     font-size: 1.2rem;
     color: var(--primary-brown);
-    /* Inherits Neue Montreal naturally now */
 }
 
 /* Grids */
