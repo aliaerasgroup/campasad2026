@@ -33,10 +33,17 @@
         <!-- Schedule Section -->
         <section id="schedule" class="section">
             <h3 class="section-title">Camp Schedule</h3>
-            <p class="section-desc">Review our daily itinerary. Save this image to your device for offline access.</p>
-            <div class="image-placeholder">
-                <img src="placeholder-schedule.png" alt="Camp Asad 2026 Schedule Placeholder" id="schedule-img">
-                <p>[ Schedule Image Upload Area ]</p>
+            <p class="section-desc">Review our daily itinerary below. You can also download a dedicated offline version straight to your camera roll.</p>
+            
+            <div class="schedule-img-container">
+                <img src="schedule-wb.png" alt="Camp Asad 2026 Schedule">
+            </div>
+            <p class="mobile-swipe-note"><em>Swipe left and right to view the full schedule.</em></p>
+            
+            <div class="download-action" style="text-align: center; margin-top: 25px;">
+                <a href="schedule-dl.png" download="Camp_Asad_2026_Schedule.png" class="btn btn-primary">
+                    Download Schedule
+                </a>
             </div>
         </section>
 
@@ -78,7 +85,7 @@
                         <input type="text" id="name" placeholder="Full Name" required>
                         <input type="email" id="email" placeholder="Email Address" required>
                         <input type="tel" id="phone" placeholder="Phone Number" required>
-                        <textarea id="notes" rows="4" placeholder="Optional: Any information you'd like to share ahead of time? (Strictly confidential between you, and the scholar.)"></textarea>
+                        <textarea id="notes" rows="4" placeholder="Optional: Any information you'd like to share ahead of time? (Strictly confidential between you, the scholar, and the organizer)"></textarea>
                         
                         <p class="privacy-notice">By submitting, you agree that your information will be handled in accordance with our privacy policy.</p>
                         
@@ -120,7 +127,7 @@
         </div>
     </div>
 
-    <!-- CHANGED: script type is now module so we can import Firebase directly -->
+    <!-- Firebase Modular Import -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
