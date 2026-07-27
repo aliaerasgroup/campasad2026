@@ -192,8 +192,8 @@ body {
 }
 
 .schedule-img-container img {
-    min-width: 800px; /* Ensures text stays readable on phones */
-    width: 100%; /* Expands naturally on desktops */
+    min-width: 800px; 
+    width: 100%; 
     height: auto;
     display: block;
 }
@@ -480,4 +480,46 @@ footer {
 .success-msg {
     font-size: 1rem;
     margin-bottom: 10px;
+}
+
+/* Scholar Bios Layout */
+.scholar-card {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    align-items: center;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid rgba(74, 59, 44, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.scholar-img {
+    width: 160px;
+    height: 160px;
+    border-radius: 15px; 
+    object-fit: cover;
+    border: 2px solid var(--primary-brown); 
+    flex-shrink: 0; 
+}
+
+.scholar-info {
+    flex-grow: 1;
+}
+
+.scholar-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.6rem;
+    color: var(--primary-brown);
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .scholar-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
 }
