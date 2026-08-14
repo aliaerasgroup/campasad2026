@@ -37,11 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'auto';
     }
 
-    openPdfBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(pdfModal); });
-    closePdfBtn.addEventListener('click', () => closeModal(pdfModal));
+    // Add check in case buttons don't exist on the current page (e.g., scholars.html)
+    if(openPdfBtn) openPdfBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(pdfModal); });
+    if(closePdfBtn) closePdfBtn.addEventListener('click', () => closeModal(pdfModal));
     
-    closeSuccessBtn.addEventListener('click', () => closeModal(successModal));
-    successDoneBtn.addEventListener('click', () => closeModal(successModal));
+    if(closeSuccessBtn) closeSuccessBtn.addEventListener('click', () => closeModal(successModal));
+    if(successDoneBtn) successDoneBtn.addEventListener('click', () => closeModal(successModal));
 
     window.addEventListener('click', (e) => {
         if (e.target === pdfModal) closeModal(pdfModal);
@@ -49,11 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Helper to Generate Google Calendar URL ---
-    function generateGCalLink(scholar, dateStr, time24Str) {
+    // Added durationMins parameter to handle Bachoo's longer slots
+    function generateGCalLink(scholar, dateStr, time24Str, durationMins) {
         const startDate = new Date(`${dateStr}T${time24Str}:00-04:00`);
         const startISO = startDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
 
-        const endDate = new Date(startDate.getTime() + 15 * 60000);
+        const endDate = new Date(startDate.getTime() + durationMins * 60000);
         const endISO = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
 
         const title = encodeURIComponent(`Aalim Hours: ${scholar} - Camp Asad`);
@@ -67,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedScholar = null;
     let selectedDate = '2026-09-05';
     let selectedTime = null;
-    let isActivelyBooking = false; // FIX: Flag to prevent the app from alerting you about your own booking!
+    let isActivelyBooking = false; 
 
     const scholarBtns = document.querySelectorAll('.scholar-btn');
     const dateBtns = document.querySelectorAll('.date-btn');
@@ -79,7 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabSep5 = document.getElementById('tab-sep5');
     const submitBtn = document.getElementById('submit-booking-btn');
 
-    const baseSlots = ["06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45"];
+    // Two different slot layouts
+    const standardSlots = ["06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45"];
+    // 20 min slots + 5 min buffer = 25 min increments
+    const bachooSlots = ["06:00", "06:25", "06:50", "07:15", "07:40"];
 
     // Centralized LIVE Database Array
     let bookedSlots = [];
@@ -90,12 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = snapshot.val();
         bookedSlots = data ? Object.keys(data) : [];
         
-        if (selectedScholar && selectedDate && !formStep.classList.contains('disabled')) {
+        if (selectedScholar && selectedDate && formStep && !formStep.classList.contains('disabled')) {
              renderTimeSlots(true);
-        } else if (selectedScholar && selectedDate) {
+        } else if (selectedScholar && selectedDate && timeGrid) {
              renderTimeSlots();
         }
     });
+
+    if(!timeGrid) return; // Stop executing booking logic if not on the booking page
 
     // 1. Scholar Selection
     scholarBtns.forEach(btn => {
@@ -104,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('selected');
             selectedScholar = e.target.dataset.scholar;
             
+            // Restrict Sept 7th for Shaykh Murtaza Bachoo
             if (selectedScholar === "Shaykh Murtaza Bachoo") {
                 tabSep7.style.display = 'none';
                 if (selectedDate === '2026-09-07') {
@@ -156,7 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTimeSlots(keepSelection = false) {
         timeGrid.innerHTML = ''; 
-        baseSlots.forEach(slot => {
+        
+        // Determine which set of slots to use
+        const currentSlots = selectedScholar === "Shaykh Murtaza Bachoo" ? bachooSlots : standardSlots;
+
+        currentSlots.forEach(slot => {
             const btn = document.createElement('button');
             btn.className = 'time-btn';
             btn.textContent = formatTime(slot);
@@ -165,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!isSlotAvailable(slot)) {
                 btn.disabled = true;
-                // FIX: Only trigger the boot-out alert if the user is NOT actively submitting the form
                 if (selectedTime === slot && !isActivelyBooking) {
                     selectedTime = null;
                     formStep.classList.add('disabled');
@@ -202,13 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Engage the active booking lock
         isActivelyBooking = true;
         
         submitBtn.textContent = "Booking...";
         submitBtn.disabled = true;
         
-        const googleCalendarUrl = generateGCalLink(selectedScholar, selectedDate, selectedTime);
+        // Dynamic duration based on scholar
+        const meetingDuration = selectedScholar === "Shaykh Murtaza Bachoo" ? 20 : 15;
+        const googleCalendarUrl = generateGCalLink(selectedScholar, selectedDate, selectedTime, meetingDuration);
+        
         const nameInput = document.getElementById('name').value;
 
         const attendeeData = {
@@ -239,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 bookedBy: attendeeName,
                 timestamp: new Date().toISOString()
             }).then(() => {
-                // Disengage lock and clear selection BEFORE firing the modal
                 isActivelyBooking = false; 
                 selectedTime = null;
 
