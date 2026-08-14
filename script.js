@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'auto';
     }
 
-    // Add check in case buttons don't exist on the current page (e.g., scholars.html)
     if(openPdfBtn) openPdfBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(pdfModal); });
     if(closePdfBtn) closePdfBtn.addEventListener('click', () => closeModal(pdfModal));
     
@@ -49,8 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === successModal) closeModal(successModal);
     });
 
-    // --- Helper to Generate Google Calendar URL ---
-    // Added durationMins parameter to handle Bachoo's longer slots
     function generateGCalLink(scholar, dateStr, time24Str, durationMins) {
         const startDate = new Date(`${dateStr}T${time24Str}:00-04:00`);
         const startISO = startDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
@@ -71,6 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedTime = null;
     let isActivelyBooking = false; 
 
+    // Scholar Email Routing
+    const scholarEmails = {
+        "Sayyid Ali Imran": "aalofimran@gmail.com",
+        "Shaykh Murtaza Bachoo": "Mbachoo@gmail.com",
+        "Shaykh Mohammad Al-Saadi": "mohammed.alsaadi@gmail.com",
+        "Ustadha Zermina Awan": "zermina.awan@gmail.com"
+    };
+
     const scholarBtns = document.querySelectorAll('.scholar-btn');
     const dateBtns = document.querySelectorAll('.date-btn');
     const timeGrid = document.getElementById('time-slots');
@@ -81,15 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabSep5 = document.getElementById('tab-sep5');
     const submitBtn = document.getElementById('submit-booking-btn');
 
-    // Two different slot layouts
     const standardSlots = ["06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45"];
-    // 20 min slots + 5 min buffer = 25 min increments
     const bachooSlots = ["06:00", "06:25", "06:50", "07:15", "07:40"];
 
-    // Centralized LIVE Database Array
     let bookedSlots = [];
 
-    // --- REALTIME FIREBASE SYNC ---
     const bookingsRef = ref(db, 'bookings');
     onValue(bookingsRef, (snapshot) => {
         const data = snapshot.val();
@@ -102,16 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if(!timeGrid) return; // Stop executing booking logic if not on the booking page
+    if(!timeGrid) return; 
 
-    // 1. Scholar Selection
     scholarBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             scholarBtns.forEach(b => b.classList.remove('selected'));
             e.target.classList.add('selected');
             selectedScholar = e.target.dataset.scholar;
             
-            // Restrict Sept 7th for Shaykh Murtaza Bachoo
             if (selectedScholar === "Shaykh Murtaza Bachoo") {
                 tabSep7.style.display = 'none';
                 if (selectedDate === '2026-09-07') {
@@ -126,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. Date Selection
     dateBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             dateBtns.forEach(b => b.classList.remove('active'));
@@ -165,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTimeSlots(keepSelection = false) {
         timeGrid.innerHTML = ''; 
         
-        // Determine which set of slots to use
         const currentSlots = selectedScholar === "Shaykh Murtaza Bachoo" ? bachooSlots : standardSlots;
 
         currentSlots.forEach(slot => {
@@ -201,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         formStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Handle Form Submission
     bookingForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -218,14 +214,15 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = "Booking...";
         submitBtn.disabled = true;
         
-        // Dynamic duration based on scholar
         const meetingDuration = selectedScholar === "Shaykh Murtaza Bachoo" ? 20 : 15;
         const googleCalendarUrl = generateGCalLink(selectedScholar, selectedDate, selectedTime, meetingDuration);
         
         const nameInput = document.getElementById('name').value;
 
+        // The updated attendeeData payload with the scholar_email variable
         const attendeeData = {
             scholar: selectedScholar,
+            scholar_email: scholarEmails[selectedScholar], 
             date: selectedDate,
             time: formatTime(selectedTime), 
             name: nameInput,
